@@ -1,0 +1,240 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* WhatsApp-inspired Green Theme - Modern and Attractive */
+    --background: 0 0% 100%;
+    --foreground: 142 15% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 142 15% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 142 15% 8%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 142 30% 96%;
+    --secondary-foreground: 142 76% 25%;
+    --muted: 142 20% 96%;
+    --muted-foreground: 142 10% 45%;
+    --accent: 142 76% 40%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 142 20% 90%;
+    --input: 142 20% 96%;
+    --ring: 142 76% 36%;
+    --radius: 0.75rem;
+    
+    /* WhatsApp-specific colors */
+    --whatsapp-green: 142 76% 36%;
+    --whatsapp-green-light: 142 50% 95%;
+    --whatsapp-green-dark: 142 76% 25%;
+    --whatsapp-teal: 180 100% 45%;
+    --whatsapp-teal-light: 180 50% 95%;
+    --message-sent: 142 76% 36%;
+    --message-delivered: 160 85% 40%;
+    --message-read: 200 100% 55%;
+    --online-status: 142 76% 40%;
+  }
+
+  .dark {
+    /* Dark mode with WhatsApp green accents */
+    --background: 142 20% 8%;
+    --foreground: 142 10% 95%;
+    --card: 142 20% 10%;
+    --card-foreground: 142 10% 95%;
+    --popover: 142 20% 10%;
+    --popover-foreground: 142 10% 95%;
+    --primary: 142 76% 50%;
+    --primary-foreground: 142 20% 8%;
+    --secondary: 142 30% 15%;
+    --secondary-foreground: 142 76% 70%;
+    --muted: 142 25% 15%;
+    --muted-foreground: 142 10% 65%;
+    --accent: 142 76% 45%;
+    --accent-foreground: 142 20% 8%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 142 25% 20%;
+    --input: 142 25% 20%;
+    --ring: 142 76% 50%;
+    
+    /* WhatsApp-specific colors - Dark mode */
+    --whatsapp-green: 142 76% 50%;
+    --whatsapp-green-light: 142 30% 15%;
+    --whatsapp-green-dark: 142 76% 40%;
+    --whatsapp-teal: 180 100% 55%;
+    --whatsapp-teal-light: 180 30% 15%;
+    --message-sent: 142 76% 50%;
+    --message-delivered: 160 85% 50%;
+    --message-read: 200 100% 60%;
+    --online-status: 142 76% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Font Size Variables - Scales everything proportionally */
+html[data-font-size="sm"] {
+  font-size: 14px; /* Base font size for small */
+}
+
+html[data-font-size="md"] {
+  font-size: 16px; /* Base font size for medium (default) */
+}
+
+html[data-font-size="lg"] {
+  font-size: 18px; /* Base font size for large */
+}
+
+/* Default font size if not set */
+html:not([data-font-size]) {
+  font-size: 16px;
+}
+
+/* Grid pattern background */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.dark .bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+/* Custom Scrollbar */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground));
+  border-radius: 3px;
+  opacity: 0.3;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  opacity: 0.5;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground));
+  opacity: 0.5;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  opacity: 0.7;
+}
+
+/* Icon improvements */
+.icon-primary {
+  @apply text-primary;
+}
+
+.icon-muted {
+  @apply text-muted-foreground;
+}
+
+.icon-accent {
+  @apply text-accent;
+}
+
+/* Message bubble styling */
+.message-bubble {
+  @apply rounded-2xl px-4 py-2 shadow-sm;
+}
+
+.message-bubble-sent {
+  @apply bg-primary text-primary-foreground;
+}
+
+.message-bubble-received {
+  @apply bg-muted text-foreground;
+}
+
+/* Card hover effects */
+.card-hover {
+  @apply transition-all duration-200 hover:shadow-md hover:scale-[1.01];
+}
+
+/* Button enhancements */
+.btn-primary {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow-md transition-all;
+}
+
+.btn-secondary {
+  @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all;
+}
+
+/* Status indicator */
+.status-online {
+  @apply bg-online;
+}
+
+.status-offline {
+  @apply bg-muted-foreground opacity-50;
+}
+
+/* React Flow Custom Styles */
+.react-flow__node {
+  @apply rounded-lg shadow-md;
+}
+
+.react-flow__handle {
+  @apply bg-primary border-2 border-background;
+}
+
+.react-flow__handle-top {
+  @apply top-[-6px];
+}
+
+.react-flow__handle-bottom {
+  @apply bottom-[-6px];
+}
+
+.react-flow__edge-path {
+  stroke: hsl(var(--primary));
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: hsl(var(--accent));
+  stroke-width: 3;
+}
+
+.react-flow__controls {
+  @apply bg-card border rounded-lg shadow-lg;
+}
+
+.react-flow__controls-button {
+  @apply bg-background border-border hover:bg-accent hover:text-accent-foreground;
+}
+
+.react-flow__minimap {
+  @apply bg-card border rounded-lg shadow-lg;
+}
+
+.react-flow__background {
+  @apply opacity-30;
+}

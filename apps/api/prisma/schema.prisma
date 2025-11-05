@@ -1,0 +1,360 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// AUTHENTICATION & USER MANAGEMENT
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  emailVerified Boolean   @default(false)
+  emailToken    String?
+  emailTokenExpires DateTime?
+  resetToken    String?
+  resetTokenExpires DateTime?
+  theme         String    @default("system") // light, dark, system
+  fontSize      String    @default("md") // sm, md, lg
+  avatar        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  contacts      Contact[]
+  groups        ContactGroup[]
+  templates     Template[]
+  campaigns     Campaign[]
+  conversations Conversation[]
+  messages      Message[]
+  chatbotFlows  ChatbotFlow[]
+  apiKeys       ApiKey[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  name        String
+  key         String   @unique
+  webhookUrl  String?
+  isActive    Boolean  @default(true)
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+// ============================================
+// CONTACTS & GROUPS
+// ============================================
+
+model Contact {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String   @unique
+  email       String?
+  status      String   @default("Active") // Active, Inactive
+  avatar      String?
+  metadata    Json?    // Additional custom fields
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupMembers ContactGroupMember[]
+  campaignRecipients CampaignRecipient[]
+  conversationParticipants ConversationParticipant[]
+  messages    Message[]
+
+  @@index([userId])
+  @@index([email])
+  @@map("contacts")
+}
+
+model ContactGroup {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  type        String   @default("static") // static, dynamic
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  members     ContactGroupMember[]
+  campaigns   Campaign[]
+  filters     ContactGroupFilter[]
+
+  @@index([userId])
+  @@map("contact_groups")
+}
+
+model ContactGroupMember {
+  id        String   @id @default(cuid())
+  contactId String
+  groupId   String
+  createdAt DateTime @default(now())
+
+  contact   Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  group     ContactGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([contactId, groupId])
+  @@map("contact_group_members")
+}
+
+model ContactGroupFilter {
+  id        String   @id @default(cuid())
+  groupId   String
+  field     String   // e.g., "status", "email"
+  operator  String   // equals, contains, greater_than, etc.
+  value     String
+  createdAt DateTime @default(now())
+
+  group     ContactGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+  @@map("contact_group_filters")
+}
+
+// ============================================
+// TEMPLATES
+// ============================================
+
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  title       String?
+  body        String
+  header      String?
+  footer      String?
+  category    String   // MARKETING, UTILITY, AUTHENTICATION
+  language    String   @default("en")
+  status      String   @default("PENDING") // APPROVED, PENDING, REJECTED
+  variables   Json?    // Array of variable names
+  buttons     Json?    // Array of button configurations
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns   Campaign[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("templates")
+}
+
+// ============================================
+// CAMPAIGNS
+// ============================================
+
+model Campaign {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  templateId  String
+  groupId     String?
+  schedule    DateTime?
+  status      String   @default("DRAFT") // DRAFT, SCHEDULED, RUNNING, COMPLETED, PAUSED
+  throttle    Int      @default(100) // Messages per minute
+  retries     Int      @default(3)
+  userId      String
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template    Template @relation(fields: [templateId], references: [id])
+  group       ContactGroup? @relation(fields: [groupId], references: [id])
+  recipients  CampaignRecipient[]
+  stats       CampaignStats?
+
+  @@index([userId])
+  @@index([status])
+  @@index([schedule])
+  @@map("campaigns")
+}
+
+model CampaignRecipient {
+  id          String   @id @default(cuid())
+  campaignId  String
+  contactId   String
+  status      String   @default("PENDING") // PENDING, SENT, DELIVERED, READ, FAILED
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  readAt      DateTime?
+  errorMessage String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  contact     Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, contactId])
+  @@index([campaignId])
+  @@index([status])
+  @@map("campaign_recipients")
+}
+
+model CampaignStats {
+  id          String   @id @default(cuid())
+  campaignId  String   @unique
+  total       Int      @default(0)
+  sent        Int      @default(0)
+  delivered   Int      @default(0)
+  read        Int      @default(0)
+  failed      Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("campaign_stats")
+}
+
+// ============================================
+// CONVERSATIONS & MESSAGES
+// ============================================
+
+model Conversation {
+  id            String   @id @default(cuid())
+  name          String?
+  type          String   @default("individual") // individual, group
+  phoneNumber   String?
+  avatar        String?
+  isOnline      Boolean  @default(false)
+  lastMessageId String?
+  lastMessageAt DateTime?
+  unreadCount   Int      @default(0)
+  userId        String
+  whatsappId    String?  // WhatsApp conversation ID
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  participants  ConversationParticipant[]
+  messages      Message[]
+  lastMessage   Message? @relation("ConversationLastMessage", fields: [lastMessageId], references: [id])
+
+  @@index([userId])
+  @@index([type])
+  @@index([phoneNumber])
+  @@index([whatsappId])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id             String   @id @default(cuid())
+  conversationId String
+  contactId      String?
+  name           String?
+  phoneNumber    String?
+  role           String   @default("member") // member, admin
+  joinedAt       DateTime @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  contact        Contact?     @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@unique([conversationId, phoneNumber])
+  @@index([conversationId])
+  @@index([contactId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id            String   @id @default(cuid())
+  conversationId String
+  senderId      String?
+  senderName    String?
+  senderPhone   String?
+  text          String?
+  type          String   @default("text") // text, image, video, document, template, audio, location
+  status        String   @default("sent") // sent, delivered, read, failed
+  mediaUrl      String?
+  templateName  String?
+  templateId    String?
+  whatsappId    String?  // WhatsApp message ID
+  metadata      Json?
+  timestamp     DateTime @default(now())
+  readAt        DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user          User?       @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  conversation  Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  contact       Contact?    @relation(fields: [senderPhone], references: [phone], onDelete: SetNull)
+  lastMessageFor Conversation[] @relation("ConversationLastMessage")
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([whatsappId])
+  @@index([timestamp])
+  @@map("messages")
+}
+
+// ============================================
+// CHATBOT FLOW
+// ============================================
+
+model ChatbotFlow {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(false)
+  userId      String
+  flowData    Json     // React Flow nodes and edges
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isActive])
+  @@map("chatbot_flows")
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("info") // info, success, warning, error
+  isRead    Boolean  @default(false)
+  metadata  Json?
+  createdAt DateTime @default(now())
+  readAt    DateTime?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}

@@ -1,0 +1,97 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+
+# testing
+/coverage
+
+# production
+/dist
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDEs and editors
+.idea/
+.vscode/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Cursor AI
+.cursor/
+.cursorrules
+.cursorignore
+
+# Nx
+.nx/cache
+.nx/workspace-data
+
+# Local env files
+.env
+.env*.local
+.env.production
+.env.development
+.env.test
+
+# Next.js
+.next
+out
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Prisma
+# Note: Migrations should be committed, but we exclude generated files
+apps/api/prisma/migrations/*.sql
+!apps/api/prisma/migrations/*/migration.sql
+
+# Database files (not migrations)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.temp/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Note: Lock files should be committed for dependency consistency
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
